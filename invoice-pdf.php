@@ -11,7 +11,7 @@ $mysqli = new mysqli(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE_NAME)
 
 // output any connection error
 if ($mysqli->connect_error) {
-	die('Error : ('.$mysqli->connect_errno .') '. $mysqli->connect_error);
+    die('Error : (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
 }
 
 // the query
@@ -24,40 +24,21 @@ $query = "SELECT p.*, i.*, c.*
 $result = mysqli_query($mysqli, $query);
 
 // mysqli select query
-if($result) {
-	while ($row = mysqli_fetch_assoc($result)) {
-		$customer_name = $row['name']; // customer name
-		$customer_email = $row['email']; // customer email
-		$customer_address_1 = $row['address_1']; // customer address
-		$customer_address_2 = $row['address_2']; // customer address
-		$customer_town = $row['town']; // customer town
-		$customer_county = $row['county']; // customer county
-		$customer_postcode = $row['postcode']; // customer postcode
-		$customer_phone = $row['phone']; // customer phone number
-		
-		//shipping
-		$customer_name_ship = $row['name_ship']; // customer name (shipping)
-		$customer_address_1_ship = $row['address_1_ship']; // customer address (shipping)
-		$customer_address_2_ship = $row['address_2_ship']; // customer address (shipping)
-		$customer_town_ship = $row['town_ship']; // customer town (shipping)
-		$customer_county_ship = $row['county_ship']; // customer county (shipping)
-		$customer_postcode_ship = $row['postcode_ship']; // customer postcode (shipping)
+if ($result) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        $customer_name = $row['name']; // customer name
+        $customer_email = $row['email']; // customer email
+        $customer_phone = $row['phone']; // customer phone number
 
-		// invoice details
-		$invoice_number = $row['invoice']; // invoice number
-		$custom_email = $row['custom_email']; // invoice custom email body
-		$invoice_date = $row['invoice_date']; // invoice date
-		$invoice_due_date = $row['invoice_due_date']; // invoice due date
-		$invoice_subtotal = $row['subtotal']; // invoice sub-total
-		$invoice_shipping = $row['shipping']; // invoice shipping amount
-		$invoice_discount = $row['discount']; // invoice discount
-		$invoice_vat = $row['vat']; // invoice vat
-		$invoice_total = $row['total']; // invoice total
-		$invoice_notes = $row['notes']; // Invoice notes
-		$invoice_type = $row['invoice_type']; // Invoice type
-        $id_bayar = $row['id_bayar'];   
-		$invoice_status = $row['status']; // Invoice status
-	}
+        // invoice details
+        $invoice_number = $row['invoice']; // invoice number
+        $custom_email = $row['customer_email']; // invoice custom email body
+        $invoice_date = $row['invoice_date']; // invoice date
+        $invoice_subtotal = $row['subtotal']; // invoice sub-total
+        $invoice_discount = $row['discount']; // invoice discount
+        $invoice_total = $row['total']; // invoice total
+        $invoice_status = $row['status']; // Invoice status
+    }
 }
 
 /* close connection */
@@ -66,6 +47,7 @@ $mysqli->close();
 // Load Dompdf library
 use Dompdf\Options;
 use Dompdf\Dompdf;
+
 require 'vendor/autoload.php';
 
 
@@ -169,11 +151,8 @@ ob_start();
                                             <?php echo $customer_name; ?>
                                         </span>
                                     </p>
-                                    <p><?php echo $customer_address_1; ?></p>
                                     <p> <?php echo $customer_phone; ?></p>
                                     <p><?php echo $customer_email; ?></p>
-                                    <p><?php echo $customer_town; ?> <?php echo $customer_postcode; ?>
-                                        <?php echo $customer_county; ?></p>
                                 </div>
                             </td>
                             <td class="w-1/2 vertical-align text-right">
@@ -185,12 +164,6 @@ ob_start();
                                         Creation Date:
                                         <span class="font-bold">
                                             <?php echo $invoice_date; ?>
-                                        </span>
-                                    </p>
-                                    <p class="font-bold">
-                                        Due Date:
-                                        <span class="font-bold">
-                                            <?php echo $invoice_due_date; ?>
                                         </span>
                                     </p>
                             </td>
@@ -221,14 +194,14 @@ ob_start();
                     </tr>
                 </thead>
                 <tbody class="tabel-market">
-                    <?php 
+                    <?php
 
                     // Connect to the database
                     $mysqli = new mysqli(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE_NAME);
 
                     // output any connection error
                     if ($mysqli->connect_error) {
-                        die('Error : ('.$mysqli->connect_errno .') '. $mysqli->connect_error);
+                        die('Error : (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
                     }
 
                     // the query
@@ -239,7 +212,7 @@ ob_start();
                     //var_dump($result2);
 
                     // mysqli select query
-                    if($result2) {
+                    if ($result2) {
                         while ($rows = mysqli_fetch_assoc($result2)) {
 
                             //var_dump($rows);
@@ -250,28 +223,29 @@ ob_start();
                             $item_discount = $rows['discount'] . '%';
                             $item_subtotal = $rows['subtotal'];
                     ?>
-                    <tr>
-                        <td name="invoice_product[]" class="border-b py-3 pl-2">
-                            <?php echo $item_product; ?>
-                        </td>
-                        <td class="border-b py-3 pl-2 text-center form-control calculate invoice_product_price required"
-                            name="invoice_product_price[]" aria-describedby="sizing-addon1" placeholder="0.00">
-                            <?php echo rupiah($item_price); ?>
-                        </td>
-                        <td class="border-b py-3 pl-2 text-center form-control calculate">
-                            <div class="form-group form-group-sm  no-margin-bottom" name="invoice_product_discount[]"
-                                placeholder="Enter % or value (ex: 10% or 10.50)">
-                                <?php echo $item_discount; ?>
-                            </div>
-                        </td>
-                        <td class="border-b py-3 pl-2 text-center">
-                            <div class="input-group input-group-sm form-control calculate-sub"
-                                name="invoice_product_sub[]" id="invoice_product_sub" aria-describedby="sizing-addon1">
-                                <?php echo rupiah($item_subtotal); ?>
-                            </div>
-                        </td>
-                    </tr>
-                    <?php } } ?>
+                            <tr>
+                                <td name="invoice_product[]" class="border-b py-3 pl-2">
+                                    <?php echo $item_product; ?>
+                                </td>
+                                <td class="border-b py-3 pl-2 text-center form-control calculate invoice_product_price required"
+                                    name="invoice_product_price[]" aria-describedby="sizing-addon1" placeholder="0.00">
+                                    <?php echo rupiah($item_price); ?>
+                                </td>
+                                <td class="border-b py-3 pl-2 text-center form-control calculate">
+                                    <div class="form-group form-group-sm  no-margin-bottom" name="invoice_product_discount[]"
+                                        placeholder="Enter % or value (ex: 10% or 10.50)">
+                                        <?php echo $item_discount; ?>
+                                    </div>
+                                </td>
+                                <td class="border-b py-3 pl-2 text-center">
+                                    <div class="input-group input-group-sm form-control calculate-sub"
+                                        name="invoice_product_sub[]" id="invoice_product_sub" aria-describedby="sizing-addon1">
+                                        <?php echo rupiah($item_subtotal); ?>
+                                    </div>
+                                </td>
+                            </tr>
+                    <?php }
+                    } ?>
                 </tbody>
             </table>
 
@@ -287,7 +261,7 @@ ob_start();
                                 // Query untuk mendapatkan data bayar
                                 $query_bayar = "SELECT * FROM bayar WHERE id_bayar = '" . $mysqli->real_escape_string($id_bayar) . "'"; // Ubah 'invoice' menjadi 'id_invoice'
                                 $result_bayar = mysqli_query($mysqli, $query_bayar);
-                                
+
                                 if ($result_bayar && mysqli_num_rows($result_bayar) > 0) {
                                     $bayar = mysqli_fetch_assoc($result_bayar);
                                     echo "<p>Bank Name : " . $bayar['bank'] . "</p>";

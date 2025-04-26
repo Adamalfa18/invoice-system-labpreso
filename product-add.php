@@ -1,11 +1,9 @@
 <?php
 include('header.php');
-
 ?>
 
 <h2>Add Product</h2>
 <hr>
-
 <div id="response" class="alert alert-success" style="display:none;">
 	<a href="#" class="close" data-dismiss="alert">&times;</a>
 	<div class="message"></div>
@@ -45,7 +43,6 @@ include('header.php');
 							<input type="text" class="form-control required" name="qty" placeholder="Quantity">
 						</div>
 					</div>
-
 					<div class="row">
 						<div class="col-xs-12 margin-top btn-group">
 							<input type="submit" id="action_add_product" class="btn btn-success float-right"
@@ -57,7 +54,6 @@ include('header.php');
 		</div>
 	</div>
 	<div>
-
 		<?php
-	include('footer.php');
-?>
+		include('footer.php');
+		?>

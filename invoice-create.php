@@ -6,7 +6,7 @@ include('functions.php');
 $conn = new mysqli(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE_NAME); // Ganti dengan detail yang sesuai
 
 if (!$conn) {
-    die("Koneksi gagal: " . mysqli_connect_error());
+	die("Koneksi gagal: " . mysqli_connect_error());
 }
 
 ?>
@@ -19,7 +19,7 @@ if (!$conn) {
 	<div class="message"></div>
 </div>
 
-<form method="post" id="create_invoice" class="style-invoice">
+<form method="post" action="response.php" id="create_invoice" class="style-invoice">
 	<input type="hidden" name="action" value="create_invoice">
 
 	<div class="row">
@@ -39,19 +39,19 @@ if (!$conn) {
 						<select name="id_pegawai" id="id_pegawai" class="form-control">
 							<option selected>Penanggung Jawab</option>
 							<?php
-                    $query = "SELECT * FROM pegawai";
-                    $result = mysqli_query($conn, $query);
-                    if (!$result) {
-                        die("Query Error: " . mysqli_error($conn));
-                    }
-                    if (mysqli_num_rows($result) > 0) {
-                        while ($row = mysqli_fetch_assoc($result)) {
-                            echo "<option value='{$row['id_pegawai']}'>{$row['nama']} - {$row['jabatan']}</option>";
-                        }
-                    } else {
-                        echo "<option value=''>Tidak ada data pembayaran</option>";
-                    }
-                    ?>
+							$query = "SELECT * FROM pegawai";
+							$result = mysqli_query($conn, $query);
+							if (!$result) {
+								die("Query Error: " . mysqli_error($conn));
+							}
+							if (mysqli_num_rows($result) > 0) {
+								while ($row = mysqli_fetch_assoc($result)) {
+									echo "<option value='{$row['id_pegawai']}'>{$row['nama']} - {$row['jabatan']}</option>";
+								}
+							} else {
+								echo "<option value=''>Tidak ada data pembayaran</option>";
+							}
+							?>
 						</select>
 					</div>
 				</div>
@@ -69,18 +69,16 @@ if (!$conn) {
 						</div>
 					</div>
 				</div>
-
 				<!-- Status Invoice -->
 				<div class="col-sm-3 col-xs-12 mb-3">
 					<label for="invoice_status">Status</label>
 					<div class="form-group">
 						<select name="invoice_status" id="invoice_status" class="form-control">
-							<option value="open" selected>Kasbon</option>
-							<option value="paid">Transfer</option>
+							<option value="kasbon" selected>Kasbon</option>
+							<option value="transfer">Transfer</option>
 						</select>
 					</div>
 				</div>
-
 				<!-- Nomor Invoice -->
 				<div class="col-sm-3 col-xs-12 mb-3">
 					<label for="invoice_id">Nomor Invoice</label>
@@ -115,19 +113,6 @@ if (!$conn) {
 								<input type="text" class="form-control margin-bottom copy-input required"
 									name="customer_name" id="customer_name" placeholder="Brand Name" tabindex="1">
 							</div>
-							<div class="form-group">
-								<input type="text" class="form-control margin-bottom copy-input required"
-									name="customer_address_1" id="customer_address_1" placeholder="PIC Name"
-									tabindex="3">
-							</div>
-							<div class="form-group">
-								<input type="text" class="form-control margin-bottom copy-input required"
-									name="customer_town" id="customer_town" placeholder="Town" tabindex="5">
-							</div>
-							<div class="form-group no-margin-bottom">
-								<input type="text" class="form-control copy-input required" name="customer_postcode"
-									id="customer_postcode" placeholder="Postcode" tabindex="7">
-							</div>
 						</div>
 						<div class="col-xs-12 col-sm-6">
 							<div class="input-group float-right margin-bottom">
@@ -135,15 +120,6 @@ if (!$conn) {
 								<input type="email" class="form-control copy-input required" name="customer_email"
 									id="customer_email" placeholder="E-mail Address" aria-describedby="sizing-addon1"
 									tabindex="2">
-							</div>
-							<div class="form-group">
-								<input type="text" class="form-control margin-bottom copy-input"
-									name="customer_address_2" id="customer_address_2" placeholder="Address"
-									tabindex="4">
-							</div>
-							<div class="form-group">
-								<input type="text" class="form-control margin-bottom required" name="customer_county"
-									id="customer_county" placeholder="Country" tabindex="6">
 							</div>
 							<div class="form-group no-margin-bottom">
 								<input type="text" class="form-control required" name="customer_phone"
@@ -154,50 +130,9 @@ if (!$conn) {
 				</div>
 			</div>
 		</div>
-
-		<div class="col-xs-12 col-md-6">
-			<div class="panel panel-default">
-				<div class="panel-heading">
-					<h4>Shipping Information</h4>
-				</div>
-				<div class="panel-body form-group form-group-sm">
-					<div class="row">
-						<div class="col-xs-12 col-sm-6">
-							<div class="form-group">
-								<input type="text" class="form-control margin-bottom required" name="customer_name_ship"
-									id="customer_name_ship" placeholder="Brand Name" tabindex="9">
-							</div>
-							<div class="form-group">
-								<input type="text" class="form-control margin-bottom" name="customer_address_2_ship"
-									id="customer_address_2_ship" placeholder="Address" tabindex="11">
-							</div>
-							<div class="form-group no-margin-bottom">
-								<input type="text" class="form-control required" name="customer_county_ship"
-									id="customer_county_ship" placeholder="Country" tabindex="13">
-							</div>
-						</div>
-						<div class="col-xs-12 col-sm-6">
-							<div class="form-group">
-								<input type="text" class="form-control margin-bottom required"
-									name="customer_address_1_ship" id="customer_address_1_ship" placeholder="PIC Name"
-									tabindex="10">
-							</div>
-							<div class="form-group">
-								<input type="text" class="form-control margin-bottom required" name="customer_town_ship"
-									id="customer_town_ship" placeholder="Town" tabindex="12">
-							</div>
-							<div class="form-group no-margin-bottom">
-								<input type="text" class="form-control required" name="customer_postcode_ship"
-									id="customer_postcode_ship" placeholder="Postcode" tabindex="14">
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
 	</div>
-
 	<!-- / end client details section -->
+
 	<div class="table-responsive-scroll">
 		<table class="table table-bordered table-hover table-striped" id="invoice_table">
 			<thead>
@@ -261,8 +196,8 @@ if (!$conn) {
 			</tbody>
 		</table>
 	</div>
-	<div id="invoice_totals" class="row text-right">
 
+	<div id="invoice_totals" class="row text-right">
 		<!-- Subtotal -->
 		<div class="col-xs-12 style-total">
 			<div class="row">
@@ -274,7 +209,6 @@ if (!$conn) {
 					<input type="hidden" name="invoice_subtotal" id="invoice_subtotal">
 				</div>
 			</div>
-
 			<!-- Discount -->
 			<div class="row">
 				<div class="col-xs-6 col-sm-5 col-sm-offset-5 text-left text-sm-right">
@@ -285,7 +219,6 @@ if (!$conn) {
 					<input type="hidden" name="invoice_discount" id="invoice_discount">
 				</div>
 			</div>
-
 			<!-- Total -->
 			<div class="row">
 				<div class="col-xs-6 col-sm-5 col-sm-offset-5 text-left text-sm-right">
@@ -297,17 +230,13 @@ if (!$conn) {
 				</div>
 			</div>
 		</div>
-
 		<!-- Penanggung Jawab -->
-
-
 		<!-- Tombol Submit -->
-
 	</div>
 	<div class="row">
 		<div class="col-xs-12 margin-top btn-group">
-			<input type="submit" id="action_edit_invoice" class="btn btn-success float-right" value="Update Invoice"
-				data-loading-text="Updating...">
+			<input type="submit" id="action_create_invoice" class="btn btn-success float-right" value="Create Invoice"
+				data-loading-text="Creating...">
 		</div>
 	</div>
 </form>
@@ -327,9 +256,9 @@ if (!$conn) {
 				<button type="button" data-dismiss="modal" class="btn btn-primary" id="selected">Add</button>
 				<button type="button" data-dismiss="modal" class="btn">Cancel</button>
 			</div>
-		</div><!-- /.modal-content -->
-	</div><!-- /.modal-dialog -->
-</div><!-- /.modal -->
+		</div>
+	</div>
+</div>
 
 <div id="insert_customer" class="modal fade">
 	<div class="modal-dialog">
@@ -350,5 +279,5 @@ if (!$conn) {
 </div><!-- /.modal -->
 
 <?php
-	include('footer.php');
+include('footer.php');
 ?>
