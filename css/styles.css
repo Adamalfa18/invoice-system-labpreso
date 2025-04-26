@@ -1,0 +1,241 @@
+/*******************************************************************************
+* Md Invoice System                                             *
+*                                                                              *
+* Version: 1.0                                                               *
+* Author: Abhishek Raj                                   				   *
+*******************************************************************************/
+
+body {
+  padding: 0;
+}
+
+body.bacground {
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 159, 67, 1) 0%,
+    rgba(17, 44, 51, 1) 50%,
+    rgba(255, 255, 255, 1) 100%
+  );
+}
+
+.btn-primary {
+  background-color: #9966cc;
+  border-color: #9966cc;
+}
+.sty-row {
+  display: flex;
+}
+.posisi-row {
+  display: grid;
+  align-items: flex-end;
+}
+
+.btn-primary:hover {
+  background-color: #993399;
+  border-color: #993399;
+}
+.btn-login {
+  background-image: linear-gradient(350deg, #f9a13d 0%, #ff5438 100%);
+}
+.btn-login:hover {
+  background-image: linear-gradient(350deg, #ff5438 0%, #f9a13d 100%);
+}
+.btn-danger {
+  background-color: #f44336;
+  border-color: #f44336;
+}
+
+.btn-danger:hover {
+  background-color: #f72a1b;
+  border-color: #f72a1b;
+}
+
+.btn-pdf {
+  background-color: #3c8dbc;
+  border-color: #3c8dbc;
+  color: #fff;
+}
+.btn-pdf:hover {
+  background-color: #0088d7;
+  border-color: #0088d7;
+  color: #fff;
+}
+
+.btn-success {
+  background-color: #009966;
+  border-color: #009966;
+}
+
+.panel-login {
+  /* background-color: #ffffff !important; */
+  /*box-shadow: 5px 0px 77px #333;*/
+}
+
+.clear {
+  clear: both;
+}
+
+.login-panel {
+  border-radius: 20px;
+  box-shadow: 1px 1px 15px 0px #333;
+  margin-top: 150px;
+}
+
+.panel-body {
+  padding: 30px 30px 15px 30px;
+}
+
+.panel-heading {
+  padding: 15px 30px 15px 30px;
+}
+
+.float-left {
+  float: left !important;
+}
+
+.float-right {
+  float: right !important;
+}
+
+.margin-bottom {
+  margin-bottom: 1em;
+}
+
+.margin-top {
+  margin-top: 3em;
+}
+
+.padding-right {
+  padding-right: 15px;
+}
+
+.no-padding-right {
+  padding-right: 0;
+}
+
+.no-margin-bottom {
+  margin-bottom: 0;
+}
+
+.user {
+  margin-top: 8px;
+  margin-right: 10px;
+}
+
+/* Forms */
+input.shipping {
+  text-align: right;
+}
+.custom_email_textarea {
+  width: 100%;
+  padding: 10px;
+}
+#invoice_type {
+  margin-top: 23px;
+}
+
+.invoice_product_qty {
+  width: 50px;
+  text-align: center;
+}
+.invoice_type {
+  text-transform: uppercase;
+}
+
+.select-customer {
+  margin-top: 10px;
+}
+
+.delete-row {
+  float: left;
+  margin-top: 4px;
+}
+
+.item-select {
+  float: left;
+  margin: 4px;
+}
+
+.item-input {
+  float: left;
+  width: 65%;
+  margin-left: 10px;
+}
+
+.textarea {
+  width: 100%;
+}
+
+.textarea textarea {
+  width: 100%;
+  padding: 10px;
+  resize: none;
+}
+
+/* Other styles */
+strong.shipping {
+  margin-top: 4px;
+  display: block;
+}
+
+/* Progress bar */
+.progress .bar {
+  display: block;
+  height: 20px;
+}
+.error-list {
+  display: none;
+}
+.progress.progress-danger .bar {
+  background-color: #c13333;
+}
+.progress.progress-warning .bar {
+  background-color: #c1bf33;
+}
+.progress.progress-success .bar {
+  background-color: #33c133;
+}
+
+.login-form {
+  margin-top: 100px;
+}
+
+.style-invoice {
+  padding-top: 40px;
+  padding-bottom: 40px;
+}
+
+.col-xs-6.col-sm-5.col-sm-offset-5.text-left.text-sm-right,
+.col-xs-6.col-sm-2.text-left.text-sm-right,
+.col-xs-6.text-left {
+  text-align: end;
+}
+
+.col-xs-12.col-sm-6.mt-3.text-right,
+.col-xs-12.col-sm-6.mt-3.text-left {
+  padding-top: 20px;
+}
+.col-xs-12.style-total {
+  padding-top: 20px;
+}
+
+.col-md-3.col-sm-6.col-xs-12.mb-2 {
+  margin-top: 15px;
+}
+.style-add.form-group.form-group-sm {
+  margin-left: 30px;
+  margin-right: 30px;
+}
+
+@media only screen and (max-width: 768px) {
+  .table-responsive-scroll {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .table-responsive-scroll table {
+    width: 1000px; /* atau min-width: max-content; */
+    max-width: none;
+  }
+}
