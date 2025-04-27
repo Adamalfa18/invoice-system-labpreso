@@ -11,7 +11,7 @@ $mysqli = new mysqli(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE_NAME)
 
 // output any connection error
 if ($mysqli->connect_error) {
-	die('Error : ('.$mysqli->connect_errno .') '. $mysqli->connect_error);
+	die('Error : (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
 }
 
 // the query
@@ -20,11 +20,12 @@ $query = "SELECT * FROM products WHERE product_id = '" . $mysqli->real_escape_st
 $result = mysqli_query($mysqli, $query);
 
 // mysqli select query
-if($result) {
+if ($result) {
 	while ($row = mysqli_fetch_assoc($result)) {
 		$product_name = $row['product_name']; // product name
 		$product_desc = $row['product_desc']; // product description
 		$product_price = $row['product_price']; // product price
+		$qty = $row['qty'];
 	}
 }
 
@@ -71,9 +72,9 @@ $mysqli->close();
 							</div>
 						</div>
 						<div class="col-xs-3">
-							<label for="id_pegawai">Kuantity</label>
-							<input type="text" class="form-control required" name="product_desc"
-								placeholder="Enter product description" value="<?php echo $product_desc; ?>">
+							<label for="qty">Kuantitas</label>
+							<input type="text" class="form-control required" name="product_qty"
+								placeholder="Enter product quantity" value="<?php echo $qty; ?>">
 						</div>
 					</div>
 					<div class="row">
@@ -89,5 +90,5 @@ $mysqli->close();
 	<div>
 
 		<?php
-	include('footer.php');
-?>
+		include('footer.php');
+		?>

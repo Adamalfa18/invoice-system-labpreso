@@ -219,6 +219,66 @@ if ($action == 'create_invoice') {
 }
 
 
+// Update product
+if ($action == 'update_product') {
+
+	// output any connection error
+	if ($mysqli->connect_error) {
+		die('Error : (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
+	}
+
+	// invoice product information
+	$getID = $_POST['id']; // id
+	$product_name = $_POST['product_name']; // product name
+	$product_desc = $_POST['product_desc']; // product desc
+	$product_price = $_POST['product_price']; // product price
+	$product_qty = $_POST['product_qty']; // product quantity
+
+	// the query
+	$query = "UPDATE products SET
+				product_name = ?,
+				product_desc = ?,
+				product_price = ?,
+				qty = ?
+			WHERE product_id = ?
+			";
+
+	/* Prepare statement */
+	$stmt = $mysqli->prepare($query);
+	if ($stmt === false) {
+		trigger_error('Wrong SQL: ' . $query . ' Error: ' . $mysqli->error, E_USER_ERROR);
+	}
+
+	/* Bind parameters. TYpes: s = string, i = integer, d = double,  b = blob */
+	$stmt->bind_param(
+		'ssssi', // Type parameter updated to include 'i' for qty (integer)
+		$product_name,
+		$product_desc,
+		$product_price,
+		$product_qty,  // bind product quantity
+		$getID
+	);
+
+	//execute the query
+	if ($stmt->execute()) {
+		//if saving success
+		echo json_encode(array(
+			'status' => 'Success',
+			'message' => 'Product has been updated successfully!'
+		));
+	} else {
+		//if unable to create new record
+		echo json_encode(array(
+			'status' => 'Error',
+			//'message'=> 'There has been an error, please try again.'
+			'message' => 'There has been an error, please try again.<pre>' . $mysqli->error . '</pre><pre>' . $query . '</pre>'
+		));
+	}
+	//close database connection
+	$mysqli->close();
+}
+
+
 // Adding new product
 if ($action == 'delete_invoice') {
 
@@ -350,64 +410,6 @@ if ($action == 'update_customer') {
 	//close database connection
 	$mysqli->close();
 }
-
-// Update product
-if ($action == 'update_product') {
-
-	// output any connection error
-	if ($mysqli->connect_error) {
-		die('Error : (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
-	}
-
-	// invoice product information
-	$getID = $_POST['id']; // id
-	$product_name = $_POST['product_name']; // product name
-	$product_desc = $_POST['product_desc']; // product desc
-	$product_price = $_POST['product_price']; // product price
-
-	// the query
-	$query = "UPDATE products SET
-				product_name = ?,
-				product_desc = ?,
-				product_price = ?
-			 WHERE product_id = ?
-			";
-
-	/* Prepare statement */
-	$stmt = $mysqli->prepare($query);
-	if ($stmt === false) {
-		trigger_error('Wrong SQL: ' . $query . ' Error: ' . $mysqli->error, E_USER_ERROR);
-	}
-
-	/* Bind parameters. TYpes: s = string, i = integer, d = double,  b = blob */
-	$stmt->bind_param(
-		'ssss',
-		$product_name,
-		$product_desc,
-		$product_price,
-		$getID
-	);
-
-	//execute the query
-	if ($stmt->execute()) {
-		//if saving success
-		echo json_encode(array(
-			'status' => 'Success',
-			'message' => 'Product has been updated successfully!'
-		));
-	} else {
-		//if unable to create new record
-		echo json_encode(array(
-			'status' => 'Error',
-			//'message'=> 'There has been an error, please try again.'
-			'message' => 'There has been an error, please try again.<pre>' . $mysqli->error . '</pre><pre>' . $query . '</pre>'
-		));
-	}
-
-	//close database connection
-	$mysqli->close();
-}
-
 
 // Adding new product
 if ($action == 'update_invoice') {
