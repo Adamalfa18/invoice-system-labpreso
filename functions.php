@@ -138,7 +138,7 @@ function popProductsList()
 	if ($results) {
 		echo '<select class="form-control item-select">';
 		while ($row = $results->fetch_assoc()) {
-			print '<option value="' . $row['product_price'] . '">' . $row["product_name"] . ' - ' . $row["product_desc"] . '</option>';
+			print '<option value="' . $row['product_price'] . '">' . $row["product_name"] . '</option>';
 		}
 		echo '</select>';
 	} else {
