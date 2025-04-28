@@ -5,7 +5,7 @@ ini_set('display_errors', 1);
 
 // DATABASE INFORMATION
 define('DATABASE_HOST', 'localhost');
-define('DATABASE_NAME', 'invoicemgsys');
+define('DATABASE_NAME', 'labpreso');
 define('DATABASE_USER', 'root');
 define('DATABASE_PASS', '');
 

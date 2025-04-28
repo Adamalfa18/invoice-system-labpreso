@@ -11,7 +11,7 @@ if (!$conn) {
 
 ?>
 
-<h2>Tambah data Cekout Labpreso</h2>
+<h2>Tambah Data Cekout Labpreso</h2>
 <!-- <hr> -->
 
 <div id="response" class="alert alert-success" style="display:none;">
@@ -99,7 +99,7 @@ if (!$conn) {
 
 
 	<div class="row">
-		<div class="col-xs-12 col-md-6">
+		<div class="col-xs-12">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h4 class="float-left">Customer Information</h4>
@@ -108,19 +108,22 @@ if (!$conn) {
 				</div>
 				<div class="panel-body form-group form-group-sm">
 					<div class="row">
-						<div class="col-xs-12 col-sm-6">
+						<div class="col-xs-12 col-sm-4">
 							<div class="form-group">
 								<input type="text" class="form-control margin-bottom copy-input required"
 									name="customer_name" id="customer_name" placeholder="Brand Name" tabindex="1">
 							</div>
 						</div>
-						<div class="col-xs-12 col-sm-6">
+						<div class="col-xs-12 col-sm-4">
 							<div class="input-group float-right margin-bottom">
 								<span class="input-group-addon"><i class="fa fa-envelope"></i></span>
 								<input type="email" class="form-control copy-input required" name="customer_email"
 									id="customer_email" placeholder="E-mail Address" aria-describedby="sizing-addon1"
 									tabindex="2">
 							</div>
+
+						</div>
+						<div class="col-xs-12 col-sm-4">
 							<div class="form-group no-margin-bottom">
 								<input type="text" class="form-control required" name="customer_phone"
 									id="customer_phone" placeholder="Phone Number" tabindex="8">
