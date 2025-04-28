@@ -196,7 +196,6 @@ if ($action == 'create_invoice') {
 			$item_query->bind_param("ssiddd", $invoice_number, $item_product, $item_qty, $item_price, $item_discount, $item_subtotal);
 			$item_query->execute();
 
-			//  Update stock produk setelah item masuk invoice_items
 			$update_stock_query = $mysqli->prepare("UPDATE products SET qty = qty - ? WHERE product_name = ?");
 			$update_stock_query->bind_param("is", $item_qty, $item_product);
 			$update_stock_query->execute();
@@ -217,7 +216,6 @@ if ($action == 'create_invoice') {
 	}
 	$mysqli->close();
 }
-
 
 // Update product
 if ($action == 'update_product') {
@@ -328,42 +326,14 @@ if ($action == 'update_customer') {
 	// billing
 	$customer_name = $_POST['customer_name']; // customer name
 	$customer_email = $_POST['customer_email']; // customer email
-	$customer_address_1 = $_POST['customer_address_1']; // customer address
-	$customer_address_2 = $_POST['customer_address_2']; // customer address
-	$customer_town = $_POST['customer_town']; // customer town
-	$customer_county = $_POST['customer_county']; // customer county
-	$customer_postcode = $_POST['customer_postcode']; // customer postcode
 	$customer_phone = $_POST['customer_phone']; // customer phone number
-
-	//shipping
-	$customer_name_ship = $_POST['customer_name_ship']; // customer name (shipping)
-	$customer_address_1_ship = $_POST['customer_address_1_ship']; // customer address (shipping)
-	$customer_address_2_ship = $_POST['customer_address_2_ship']; // customer address (shipping)
-	$customer_town_ship = $_POST['customer_town_ship']; // customer town (shipping)
-	$customer_county_ship = $_POST['customer_county_ship']; // customer county (shipping)
-	$customer_postcode_ship = $_POST['customer_postcode_ship']; // customer postcode (shipping)
 
 	// the query
 	$query = "UPDATE store_customers SET
-				name = ?,
-				email = ?,
-				address_1 = ?,
-				address_2 = ?,
-				town = ?,
-				county = ?,
-				postcode = ?,
-				phone = ?,
-
-				name_ship = ?,
-				address_1_ship = ?,
-				address_2_ship = ?,
-				town_ship = ?,
-				county_ship = ?,
-				postcode_ship = ?
-
-				WHERE id = ?
-
-			";
+            name = ?,
+            email = ?,
+            phone = ?
+        WHERE id = ?";
 
 	/* Prepare statement */
 	$stmt = $mysqli->prepare($query);
@@ -373,21 +343,10 @@ if ($action == 'update_customer') {
 
 	/* Bind parameters. TYpes: s = string, i = integer, d = double,  b = blob */
 	$stmt->bind_param(
-		'sssssssssssssss',
+		'ssss',
 		$customer_name,
 		$customer_email,
-		$customer_address_1,
-		$customer_address_2,
-		$customer_town,
-		$customer_county,
-		$customer_postcode,
 		$customer_phone,
-		$customer_name_ship,
-		$customer_address_1_ship,
-		$customer_address_2_ship,
-		$customer_town_ship,
-		$customer_county_ship,
-		$customer_postcode_ship,
 		$getID
 	);
 
@@ -406,142 +365,85 @@ if ($action == 'update_customer') {
 			'message' => 'There has been an error, please try again.<pre>' . $mysqli->error . '</pre><pre>' . $query . '</pre>'
 		));
 	}
-
 	//close database connection
 	$mysqli->close();
 }
 
-// Adding new product
 if ($action == 'update_invoice') {
-	// output any connection error
 	if ($mysqli->connect_error) {
-		die(json_encode(array('status' => 'Error', 'message' => 'Connection error: ' . $mysqli->connect_error)));
+		die(json_encode(['status' => 'Error', 'message' => 'Connection error: ' . $mysqli->connect_error]));
 	}
 
-	$id = $_POST["update_id"];
-	// Log ID yang diterima
-	error_log("Update ID: " . $id);
+	$mysqli->begin_transaction(); // MULAI TRANSAKSI
 
-	// Prepare statement for deletion
-	$query = "DELETE FROM invoices WHERE invoice = ?"; // Hanya satu pernyataan
-	$stmt = $mysqli->prepare($query);
-	if (!$stmt) {
-		die(json_encode(array('status' => 'Error', 'message' => 'Prepare error: ' . $mysqli->error)));
-	}
-	$stmt->bind_param('s', $id); // Hanya satu parameter
-	if (!$stmt->execute()) {
-		echo json_encode(array('status' => 'Error', 'message' => 'Delete error: ' . $stmt->error));
-		exit;
-	}
+	try {
+		$id = $_POST["update_id"];
+		$customer_name = $_POST['customer_name'];
+		$customer_email = $_POST['customer_email'];
+		$customer_phone = $_POST['customer_phone'];
 
-	// Hapus invoice_items setelah menghapus invoice
-	$query = "DELETE FROM invoice_items WHERE invoice = ?"; // Pernyataan kedua
-	$stmt = $mysqli->prepare($query);
-	if (!$stmt) {
-		die(json_encode(array('status' => 'Error', 'message' => 'Prepare error: ' . $mysqli->error)));
-	}
-	$stmt->bind_param('s', $id); // Hanya satu parameter
-	if (!$stmt->execute()) {
-		echo json_encode(array('status' => 'Error', 'message' => 'Delete error: ' . $stmt->error));
-		exit;
-	}
+		$invoice_number = $_POST['invoice_id'];
+		$invoice_date = $_POST['invoice_date'];
+		$invoice_subtotal = $_POST['invoice_subtotal'];
+		$invoice_discount = $_POST['invoice_discount'];
+		$invoice_total = $_POST['invoice_total'];
+		$id_pegawai = $_POST['id_pegawai'];
+		$invoice_status = $_POST['invoice_status'];
 
-	// Hapus ostumer 
+		// UPDATE invoices
+		$stmt = $mysqli->prepare("
+            UPDATE invoices 
+            SET invoice_date = ?, subtotal = ?, discount = ?, total = ?, id_pegawai = ?, status = ?
+            WHERE invoice = ?
+        ");
+		if (!$stmt) throw new Exception('Prepare update invoices error: ' . $mysqli->error);
+		$stmt->bind_param("sdddiss", $invoice_date, $invoice_subtotal, $invoice_discount, $invoice_total, $id_pegawai, $invoice_status, $id);
+		if (!$stmt->execute()) throw new Exception('Update invoices error: ' . $stmt->error);
 
-	$query = "DELETE FROM customers WHERE invoice = ?"; // Pernyataan kedua
-	$stmt = $mysqli->prepare($query);
-	if (!$stmt) {
-		die(json_encode(array('status' => 'Error', 'message' => 'Prepare error: ' . $mysqli->error)));
-	}
-	$stmt->bind_param('s', $id); // Hanya satu parameter
-	if (!$stmt->execute()) {
-		echo json_encode(array('status' => 'Error', 'message' => 'Delete error: ' . $stmt->error));
-		exit;
-	}
+		// UPDATE customers
+		$stmt = $mysqli->prepare("
+            UPDATE customers 
+            SET name = ?, email = ?, phone = ?
+            WHERE invoice = ?
+        ");
+		if (!$stmt) throw new Exception('Prepare update customers error: ' . $mysqli->error);
+		$stmt->bind_param("ssss", $customer_name, $customer_email, $customer_phone, $id);
+		if (!$stmt->execute()) throw new Exception('Update customers error: ' . $stmt->error);
 
-	// invoice customer information
-	$customer_name = $_POST['customer_name'];
-	$customer_email = $_POST['customer_email'];
-	$customer_address_1 = $_POST['customer_address_1'];
-	$customer_address_2 = $_POST['customer_address_2'];
-	$customer_town = $_POST['customer_town'];
-	$customer_county = $_POST['customer_county'];
-	$customer_postcode = $_POST['customer_postcode'];
-	$customer_phone = $_POST['customer_phone'];
+		// HAPUS semua item lama di invoice_items
+		$stmt = $mysqli->prepare("DELETE FROM invoice_items WHERE invoice = ?");
+		if (!$stmt) throw new Exception('Prepare delete invoice_items error: ' . $mysqli->error);
+		$stmt->bind_param('s', $id);
+		if (!$stmt->execute()) throw new Exception('Delete invoice_items error: ' . $stmt->error);
 
-	$customer_name_ship = $_POST['customer_name_ship'];
-	$customer_address_1_ship = $_POST['customer_address_1_ship'];
-	$customer_address_2_ship = $_POST['customer_address_2_ship'];
-	$customer_town_ship = $_POST['customer_town_ship'];
-	$customer_county_ship = $_POST['customer_county_ship'];
-	$customer_postcode_ship = $_POST['customer_postcode_ship'];
+		// INSERT ulang invoice_items
+		foreach ($_POST['invoice_product'] as $key => $item_product) {
+			$item_qty = $_POST['invoice_product_qty'][$key];
+			$item_price = $_POST['invoice_product_price'][$key];
+			$item_discount = $_POST['invoice_product_discount'][$key];
+			$item_subtotal = $_POST['invoice_product_sub'][$key];
 
-	$invoice_number = $_POST['invoice_id'];
-	$custom_email = ''; // Hapus custom_email
-	$invoice_date = $_POST['invoice_date'];
-	$invoice_due_date = $_POST['invoice_due_date'];
-	$invoice_subtotal = $_POST['invoice_subtotal'];
-	$invoice_shipping = $_POST['invoice_shipping'];
-	$invoice_discount = $_POST['invoice_discount'];
-	$invoice_vat = $_POST['invoice_vat'];
-	$invoice_total = $_POST['invoice_total'];
-	$invoice_notes = $_POST['invoice_notes'];
-	$invoice_type = $_POST['invoice_type'];
-	$id_bayar = $_POST['id_bayar'];
-	$id_pegawai = $_POST['id_pegawai'];
-	$invoice_status = $_POST['invoice_status'];
-
-	// insert invoice into database
-	$query = "INSERT INTO invoices (invoice, custom_email, invoice_date, invoice_due_date, subtotal, shipping, discount, vat, total, notes, invoice_type, id_bayar, id_pegawai, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	$stmt = $mysqli->prepare($query);
-	if (!$stmt) {
-		die(json_encode(array('status' => 'Error', 'message' => 'Prepare error: ' . $mysqli->error)));
-	}
-	$stmt->bind_param("isssdddddsssss", $invoice_number, $custom_email, $invoice_date, $invoice_due_date, $invoice_subtotal, $invoice_shipping, $invoice_discount, $invoice_vat, $invoice_total, $invoice_notes, $invoice_type, $id_bayar, $id_pegawai, $invoice_status);
-	if (!$stmt->execute()) {
-		echo json_encode(array('status' => 'Error', 'message' => 'Insert invoice error: ' . $stmt->error));
-		exit;
-	}
-
-	// insert customer details into database
-	$query = "INSERT INTO customers (invoice, name, email, address_1, address_2, town, county, postcode, phone, name_ship, address_1_ship, address_2_ship, town_ship, county_ship, postcode_ship) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-	$stmt = $mysqli->prepare($query);
-	if (!$stmt) {
-		die(json_encode(array('status' => 'Error', 'message' => 'Prepare error: ' . $mysqli->error)));
-	}
-	$stmt->bind_param("sssssssssssssss", $invoice_number, $customer_name, $customer_email, $customer_address_1, $customer_address_2, $customer_town, $customer_county, $customer_postcode, $customer_phone, $customer_name_ship, $customer_address_1_ship, $customer_address_2_ship, $customer_town_ship, $customer_county_ship, $customer_postcode_ship);
-	if (!$stmt->execute()) {
-		echo json_encode(array('status' => 'Error', 'message' => 'Insert customer error: ' . $stmt->error));
-		exit;
-	}
-
-	// invoice product items
-	foreach ($_POST['invoice_product'] as $key => $value) {
-		$item_product = $value;
-		$item_qty = $_POST['invoice_product_qty'][$key];
-		$item_price = $_POST['invoice_product_price'][$key];
-		$item_discount = $_POST['invoice_product_discount'][$key];
-		$item_subtotal = $_POST['invoice_product_sub'][$key];
-
-		// insert invoice items into database
-		$query = "INSERT INTO invoice_items (invoice, product, qty, price, discount, subtotal) VALUES (?, ?, ?, ?, ?, ?)";
-		$stmt = $mysqli->prepare($query);
-		if (!$stmt) {
-			die(json_encode(array('status' => 'Error', 'message' => 'Prepare error: ' . $mysqli->error)));
+			$stmt = $mysqli->prepare("
+                INSERT INTO invoice_items (invoice, product, qty, price, discount, subtotal) 
+                VALUES (?, ?, ?, ?, ?, ?)
+            ");
+			if (!$stmt) throw new Exception('Prepare insert invoice_items error: ' . $mysqli->error);
+			$stmt->bind_param("ssiddd", $invoice_number, $item_product, $item_qty, $item_price, $item_discount, $item_subtotal);
+			if (!$stmt->execute()) throw new Exception('Insert invoice_items error: ' . $stmt->error);
 		}
-		$stmt->bind_param("ssiddd", $invoice_number, $item_product, $item_qty, $item_price, $item_discount, $item_subtotal);
-		if (!$stmt->execute()) {
-			echo json_encode(array('status' => 'Error', 'message' => 'Insert invoice item error: ' . $stmt->error));
-			exit;
-		}
+
+		$mysqli->commit(); // SEMUA BERHASIL
+		header('Content-Type: application/json');
+		echo json_encode(['status' => 'Success', 'message' => 'Invoice updated successfully.']);
+	} catch (Exception $e) {
+		$mysqli->rollback(); // ERROR, batalkan semua perubahan
+		header('Content-Type: application/json');
+		echo json_encode(['status' => 'Error', 'message' => $e->getMessage()]);
 	}
 
-	header('Content-Type: application/json');
-	echo json_encode(array('status' => 'Success', 'message' => 'Invoice has been updated successfully!'));
-
-	// close connection 
 	$mysqli->close();
 }
+
 
 // Adding new product
 if ($action == 'delete_product') {

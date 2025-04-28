@@ -181,9 +181,11 @@ ob_start();
                             class="border-b-2 border-main pb-3 pl-2 font-bold text-main text-center">
                             Item
                         </td>
-
                         <td class="border-b-2 border-main pb-3 pl-2 text-center font-bold text-main text-center">
                             Price
+                        </td>
+                        <td class="border-b-2 border-main pb-3 pl-2 text-center font-bold text-main text-center">
+                            Quantity
                         </td>
                         <td class="border-b-2 border-main pb-3 pl-2 text-right font-bold text-main text-center">
                             Discount
@@ -195,15 +197,12 @@ ob_start();
                 </thead>
                 <tbody class="tabel-market">
                     <?php
-
                     // Connect to the database
                     $mysqli = new mysqli(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE_NAME);
-
                     // output any connection error
                     if ($mysqli->connect_error) {
                         die('Error : (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
                     }
-
                     // the query
                     $query2 = "SELECT * FROM invoice_items WHERE invoice = '" . $mysqli->real_escape_string($getID) . "'";
 
@@ -219,7 +218,7 @@ ob_start();
 
                             $item_product = $rows['product'];
                             $item_price = $rows['price'];
-                            // $item_discount = $rows['discount'];
+                            $item_qty = $rows['qty'];
                             $item_discount = $rows['discount'] . '%';
                             $item_subtotal = $rows['subtotal'];
                     ?>
@@ -230,6 +229,10 @@ ob_start();
                                 <td class="border-b py-3 pl-2 text-center form-control calculate invoice_product_price required"
                                     name="invoice_product_price[]" aria-describedby="sizing-addon1" placeholder="0.00">
                                     <?php echo rupiah($item_price); ?>
+                                </td>
+                                <td class="border-b py-3 pl-2 text-center form-control calculate qty required"
+                                    name="invoice_product_price[]" aria-describedby="sizing-addon1" placeholder="0.00">
+                                    <?php echo $item_qty; ?>
                                 </td>
                                 <td class="border-b py-3 pl-2 text-center form-control calculate">
                                     <div class="form-group form-group-sm  no-margin-bottom" name="invoice_product_discount[]"
@@ -273,7 +276,6 @@ ob_start();
                                 ?>
                             </div>
                         </td>
-
                         <td class="w-lg2 text-left">
                             <div class="play-flex text-sm text-neutral-600">
                                 <p class="play">
