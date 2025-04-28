@@ -159,33 +159,65 @@ if ($action == 'create_customer') {
 // Create invoice
 if ($action == 'create_invoice') {
 	header('Content-Type: application/json');
-	// Penagihan
-	$customer_name = mysqli_real_escape_string($mysqli, $_POST['customer_name']);
-	$customer_email = mysqli_real_escape_string($mysqli, $_POST['customer_email']);
-	$customer_phone = mysqli_real_escape_string($mysqli, $_POST['customer_phone']);
 
-	// Detail faktur
-	$invoice_number = mysqli_real_escape_string($mysqli, $_POST['invoice_id']);
-	// $custom_email = mysqli_real_escape_string($mysqli, $_POST['custom_email']);
-	$invoice_date = mysqli_real_escape_string($mysqli, $_POST['invoice_date']);
-	$invoice_subtotal = floatval($_POST['invoice_subtotal']);
-	$invoice_discount = floatval($_POST['invoice_discount']);
-	$invoice_total = floatval($_POST['invoice_total']);
-	$id_pegawai = mysqli_real_escape_string($mysqli, $_POST['id_pegawai']);
-	$invoice_status = mysqli_real_escape_string($mysqli, $_POST['invoice_status']);
+	// Mulai transaksi
+	$mysqli->begin_transaction();
 
-	// Gunakan prepared statement untuk menghindari SQL injection
-	$query = $mysqli->prepare("INSERT INTO invoices (invoice, customer_email, invoice_date, subtotal, discount, total, id_pegawai, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-	$query->bind_param("sssdddis", $invoice_number, $customer_email, $invoice_date, $invoice_subtotal, $invoice_discount, $invoice_total, $id_pegawai, $invoice_status);
+	try {
+		// Penagihan
+		$customer_name = mysqli_real_escape_string($mysqli, $_POST['customer_name']);
+		$customer_email = mysqli_real_escape_string($mysqli, $_POST['customer_email']);
+		$customer_phone = mysqli_real_escape_string($mysqli, $_POST['customer_phone']);
 
-	if ($query->execute()) {
+		// Detail faktur
+		$invoice_number = mysqli_real_escape_string($mysqli, $_POST['invoice_id']);
+		$invoice_date = mysqli_real_escape_string($mysqli, $_POST['invoice_date']);
+		$invoice_subtotal = floatval($_POST['invoice_subtotal']);
+		$invoice_discount = floatval($_POST['invoice_discount']);
+		$invoice_total = floatval($_POST['invoice_total']);
+		$id_pegawai = mysqli_real_escape_string($mysqli, $_POST['id_pegawai']);
+		$invoice_status = mysqli_real_escape_string($mysqli, $_POST['invoice_status']);
+
+		// Periksa stok untuk setiap produk dalam faktur
+		foreach ($_POST['invoice_product'] as $key => $value) {
+			$item_product = mysqli_real_escape_string($mysqli, $value);
+			$item_qty = intval($_POST['invoice_product_qty'][$key]);
+
+			// Periksa stok produk
+			$stock_query = $mysqli->prepare("SELECT qty FROM products WHERE product_name = ?");
+			$stock_query->bind_param("s", $item_product);
+			$stock_query->execute();
+			$stock_result = $stock_query->get_result();
+			$stock_row = $stock_result->fetch_assoc();
+
+			if ($stock_row) {
+				$product_stock = $stock_row['qty'];
+
+				// Jika stok produk kurang dari jumlah yang dipesan
+				if ($product_stock < $item_qty) {
+					throw new Exception('Stok produk "' . $item_product . '" tidak mencukupi untuk jumlah yang dipesan.');
+				}
+			} else {
+				throw new Exception('Produk "' . $item_product . '" tidak ditemukan di database.');
+			}
+		}
+
+		// Insert faktur ke tabel invoices
+		$query = $mysqli->prepare("INSERT INTO invoices (invoice, customer_email, invoice_date, subtotal, discount, total, id_pegawai, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+		$query->bind_param("sssdddis", $invoice_number, $customer_email, $invoice_date, $invoice_subtotal, $invoice_discount, $invoice_total, $id_pegawai, $invoice_status);
+		if (!$query->execute()) {
+			throw new Exception("Gagal menyimpan faktur.");
+		}
+
+		// Insert pelanggan ke tabel customers
 		$customer_query = $mysqli->prepare("INSERT INTO customers (invoice, name, email, phone) VALUES (?, ?, ?, ?)");
 		$customer_query->bind_param("ssss", $invoice_number, $customer_name, $customer_email, $customer_phone);
-		$customer_query->execute();
+		if (!$customer_query->execute()) {
+			throw new Exception("Gagal menyimpan data pelanggan.");
+		}
 
-		// Item produk faktur
+		// Insert item produk ke tabel invoice_items dan update stok
 		$item_query = $mysqli->prepare("INSERT INTO invoice_items (invoice, product, qty, price, discount, subtotal) VALUES (?, ?, ?, ?, ?, ?)");
-
 		foreach ($_POST['invoice_product'] as $key => $value) {
 			$item_product = mysqli_real_escape_string($mysqli, $value);
 			$item_qty = intval($_POST['invoice_product_qty'][$key]);
@@ -193,13 +225,22 @@ if ($action == 'create_invoice') {
 			$item_discount = floatval($_POST['invoice_product_discount'][$key]);
 			$item_subtotal = floatval($_POST['invoice_product_sub'][$key]);
 
+			// Masukkan item ke dalam invoice
 			$item_query->bind_param("ssiddd", $invoice_number, $item_product, $item_qty, $item_price, $item_discount, $item_subtotal);
-			$item_query->execute();
+			if (!$item_query->execute()) {
+				throw new Exception("Gagal menyimpan item produk.");
+			}
 
+			// Update stok produk
 			$update_stock_query = $mysqli->prepare("UPDATE products SET qty = qty - ? WHERE product_name = ?");
 			$update_stock_query->bind_param("is", $item_qty, $item_product);
-			$update_stock_query->execute();
+			if (!$update_stock_query->execute()) {
+				throw new Exception("Gagal memperbarui stok produk.");
+			}
 		}
+
+		// Jika semua query berhasil, commit transaksi
+		$mysqli->commit();
 
 		// Buat PDF faktur
 		// ... (kode untuk membuat PDF tetap sama)
@@ -207,13 +248,17 @@ if ($action == 'create_invoice') {
 			'status' => 'Success',
 			'message' => 'Faktur telah berhasil dibuat!'
 		));
-	} else {
-		header('Content-Type: application/json');
+	} catch (Exception $e) {
+		// Jika terjadi error, rollback transaksi
+		$mysqli->rollback();
+
+		// Tampilkan pesan error
 		echo json_encode(array(
 			'status' => 'Error',
-			'message' => 'Terjadi kesalahan saat membuat faktur. Silakan coba lagi.'
+			'message' => $e->getMessage()
 		));
 	}
+
 	$mysqli->close();
 }
 
