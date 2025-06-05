@@ -1,6 +1,6 @@
 <?php
-	//check login
-	include("session.php");
+//check login
+include("session.php");
 ?>
 
 
@@ -78,7 +78,7 @@
                 <!-- The user image in the navbar-->
                 <img src="images/admin.jpeg" class="user-image" alt="User Image">
                 <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                <span class="hidden-xs"><?php echo $_SESSION['login_username'];?></span>
+                <span class="hidden-xs"><?php echo $_SESSION['login_username']; ?></span>
               </a>
               <ul class="dropdown-menu">
                 <!-- Drop down list-->

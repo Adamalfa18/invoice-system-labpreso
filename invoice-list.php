@@ -22,7 +22,11 @@ include('functions.php');
 			<div class="panel-heading">
 				<h4>Manage Invoices</h4>
 			</div>
+
 			<div class="panel-body form-group form-group-sm">
+				<a href="invoice-recap.php" class="btn btn-success float-right" role="button">
+					Invoice Recap
+				</a>
 				<?php getInvoices(); ?>
 			</div>
 		</div>
@@ -49,5 +53,5 @@ include('functions.php');
 		</div><!-- /.modal -->
 
 		<?php
-	include('footer.php');
-?>
+		include('footer.php');
+		?>

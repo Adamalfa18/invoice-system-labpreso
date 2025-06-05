@@ -32,30 +32,6 @@ if (!$conn) {
 		<div class="col-xs-12">
 			<div class="row">
 
-				<!-- Penanggung Jawab -->
-				<div class="col-sm-3 col-xs-12 mb-3">
-					<label for="id_pegawai">Penanggung Jawab</label>
-					<div class="form-group">
-						<select name="id_pegawai" id="id_pegawai" class="form-control">
-							<option selected>Penanggung Jawab</option>
-							<?php
-							$query = "SELECT * FROM pegawai";
-							$result = mysqli_query($conn, $query);
-							if (!$result) {
-								die("Query Error: " . mysqli_error($conn));
-							}
-							if (mysqli_num_rows($result) > 0) {
-								while ($row = mysqli_fetch_assoc($result)) {
-									echo "<option value='{$row['id_pegawai']}'>{$row['nama']} - {$row['jabatan']}</option>";
-								}
-							} else {
-								echo "<option value=''>Tidak ada data pembayaran</option>";
-							}
-							?>
-						</select>
-					</div>
-				</div>
-
 				<!-- Tanggal Invoice -->
 				<div class="col-sm-3 col-xs-12 mb-3">
 					<label for="invoice_date">Tanggal Invoice</label>

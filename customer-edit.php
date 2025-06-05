@@ -46,7 +46,7 @@ $mysqli->close();
 	<input type="hidden" name="action" value="update_customer">
 	<input type="hidden" name="id" value="<?php echo $getID; ?>">
 	<div class="row">
-		<div class="col-xs-6">
+		<div class="col-xs-12">
 			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h4>Editing Customer (<?php echo $getID; ?>)</h4>
@@ -54,18 +54,27 @@ $mysqli->close();
 				</div>
 				<div class="panel-body form-group form-group-sm">
 					<div class="row">
-						<div class="col-xs-6">
+						<div class="col-xs-12 col-sm-4">
 							<div class="form-group">
-								<input type="text" class="form-control margin-bottom copy-input required" name="customer_name" id="customer_name" placeholder="Enter name" tabindex="1" value="<?php echo $customer_name; ?>">
+								<input type="text" class="form-control margin-bottom copy-input required"
+									name="customer_name" id="customer_name" placeholder="Enter name" tabindex="1"
+									value="<?php echo $customer_name; ?>">
 							</div>
 						</div>
-						<div class="col-xs-6">
+						<div class="col-xs-12 col-sm-4">
 							<div class="input-group float-right margin-bottom">
 								<span class="input-group-addon">@</span>
-								<input type="email" class="form-control copy-input required" name="customer_email" id="customer_email" placeholder="E-mail address" aria-describedby="sizing-addon1" tabindex="2" value="<?php echo $customer_email; ?>">
+								<input type="email" class="form-control copy-input required" name="customer_email"
+									id="customer_email" placeholder="E-mail address" aria-describedby="sizing-addon1"
+									tabindex="2" value="<?php echo $customer_email; ?>">
 							</div>
+
+						</div>
+						<div class="col-xs-12 col-sm-4">
 							<div class="form-group no-margin-bottom">
-								<input type="text" class="form-control required" name="customer_phone" id="invoice_phone" placeholder="Phone number" tabindex="8" value="<?php echo $customer_phone; ?>">
+								<input type="text" class="form-control required" name="customer_phone"
+									id="invoice_phone" placeholder="Phone number" tabindex="8"
+									value="<?php echo $customer_phone; ?>">
 							</div>
 						</div>
 					</div>
@@ -75,7 +84,8 @@ $mysqli->close();
 	</div>
 	<div class="row">
 		<div class="col-xs-12 margin-top btn-group">
-			<input type="submit" id="action_update_customer" class="btn btn-success float-right" value="Update Customer" data-loading-text="Updating...">
+			<input type="submit" id="action_update_customer" class="btn btn-success float-right" value="Update Customer"
+				data-loading-text="Updating...">
 		</div>
 	</div>
 </form>

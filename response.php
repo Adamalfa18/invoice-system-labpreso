@@ -175,7 +175,6 @@ if ($action == 'create_invoice') {
 		$invoice_subtotal = floatval($_POST['invoice_subtotal']);
 		$invoice_discount = floatval($_POST['invoice_discount']);
 		$invoice_total = floatval($_POST['invoice_total']);
-		$id_pegawai = mysqli_real_escape_string($mysqli, $_POST['id_pegawai']);
 		$invoice_status = mysqli_real_escape_string($mysqli, $_POST['invoice_status']);
 
 		// Periksa stok untuk setiap produk dalam faktur
@@ -203,8 +202,8 @@ if ($action == 'create_invoice') {
 		}
 
 		// Insert faktur ke tabel invoices
-		$query = $mysqli->prepare("INSERT INTO invoices (invoice, customer_email, invoice_date, subtotal, discount, total, id_pegawai, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
-		$query->bind_param("sssdddis", $invoice_number, $customer_email, $invoice_date, $invoice_subtotal, $invoice_discount, $invoice_total, $id_pegawai, $invoice_status);
+		$query = $mysqli->prepare("INSERT INTO invoices (invoice, customer_email, invoice_date, subtotal, discount, total, status) VALUES (?, ?, ?, ?, ?, ?, ?)");
+		$query->bind_param("sssddds", $invoice_number, $customer_email, $invoice_date, $invoice_subtotal, $invoice_discount, $invoice_total, $invoice_status);
 		if (!$query->execute()) {
 			throw new Exception("Gagal menyimpan faktur.");
 		}
@@ -342,7 +341,7 @@ if ($action == 'delete_invoice') {
 		//if saving success
 		echo json_encode(array(
 			'status' => 'Success',
-			'message' => 'Product has been deleted successfully!'
+			'message' => 'Invoice has been deleted successfully!'
 		));
 	} else {
 		//if unable to create new record

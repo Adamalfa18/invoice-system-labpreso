@@ -21,11 +21,11 @@ function getInvoices()
 			throw new Exception('Kesalahan koneksi: (' . $mysqli->connect_errno . ') ' . $mysqli->connect_error);
 		}
 		// Query yang lebih efisien
-		$query = "SELECT i.invoice, c.name, i.invoice_date, i.status, c.email, i.customer_email, e.nama
-			FROM invoices i
-			JOIN customers c ON c.invoice = i.invoice
-			LEFT JOIN pegawai e ON e.id_pegawai = i.id_pegawai
-			ORDER BY i.invoice";
+		$query = "SELECT i.invoice, c.name, i.invoice_date, i.status, i.subtotal, c.email, i.customer_email, e.nama
+		FROM invoices i
+		JOIN customers c ON c.invoice = i.invoice
+		LEFT JOIN pegawai e ON e.id_pegawai = i.id_pegawai
+		ORDER BY i.invoice";
 		// Gunakan prepared statement
 		$stmt = $mysqli->prepare($query);
 
@@ -36,12 +36,16 @@ function getInvoices()
 		$results = $stmt->get_result();
 
 		if ($results->num_rows > 0) {
+			print '
+			<input type="month" id="filter-month-year">
+			<br><br>
+			';
 			print '<table class="table table-striped table-hover table-bordered" id="data-table" cellspacing="0"><thead>
 			<tr>
 				<th>Invoice</th>
 				<th>Customer</th>
-				<th>PJ</th>
 				<th>Date</th>
+				<th>Total</th>
 				<th>Status</th>
 				<th>Actions</th>
 			</tr></thead><tbody>';
@@ -52,8 +56,8 @@ function getInvoices()
 				<tr>
 					<td>' . htmlspecialchars($row["invoice"]) . '</td>
 					<td>' . htmlspecialchars($row["name"]) . '</td>
-					<td>' . htmlspecialchars($row["nama"] ?? '-') . '</td>
 				    <td>' . htmlspecialchars($row["invoice_date"]) . '</td>
+					<td>Rp ' . number_format($row["subtotal"], 0, ',', '.') . '</td>
 				';
 				if ($row['status'] == "kasbon") {
 					print '<td><span class="label label-primary">' . htmlspecialchars($row['status']) . '</span></td>';
@@ -65,10 +69,7 @@ function getInvoices()
 				        <a href="invoice-edit.php?id=' . htmlspecialchars($row["invoice"]) . '" class="btn btn-primary btn-xs" title="Edit">
 				            <span class="glyphicon glyphicon-edit" aria-hidden="true"></span>
 				        </a>
-				        <a href="invoice-pdf.php?id=' . htmlspecialchars($row["invoice"]) . '" class="btn btn-pdf btn-xs" title="Pdf Marketlab">
-				            <span class="glyphicon glyphicon-floppy-saved" aria-hidden="true"></span>
-				        </a>
-						
+				        
 				        <a href="#" 
 							data-invoice-id="' . htmlspecialchars($row['invoice']) . '" 
 							class="btn btn-danger btn-xs delete-invoice" 
@@ -391,4 +392,89 @@ function getCustomers()
 
 	// close connection
 	$mysqli->close();
+}
+
+function getInvoiceRecap($monthFilter = null)
+{
+	try {
+		$mysqli = new mysqli(DATABASE_HOST, DATABASE_USER, DATABASE_PASS, DATABASE_NAME);
+		if ($mysqli->connect_error) {
+			throw new Exception('Connection error: ' . $mysqli->connect_error);
+		}
+
+		// Base query
+		$query = "
+			SELECT 
+				c.name,
+				summary.customer_email,
+				summary.total_invoice,
+				summary.bulan_format,
+				summary.bulan_filter
+			FROM (
+				SELECT 
+					i.customer_email,
+					SUM(i.subtotal) AS total_invoice, 
+					DATE_FORMAT(STR_TO_DATE(i.invoice_date, '%d/%m/%Y'), '%M %Y') AS bulan_format,
+					DATE_FORMAT(STR_TO_DATE(i.invoice_date, '%d/%m/%Y'), '%Y-%m') AS bulan_filter
+				FROM invoices i
+		";
+
+		$params = [];
+		$types = "";
+
+		if ($monthFilter) {
+			$query .= " WHERE DATE_FORMAT(STR_TO_DATE(i.invoice_date, '%d/%m/%Y'), '%Y-%m') = ? ";
+			$params[] = $monthFilter;
+			$types .= "s";
+		}
+
+		$query .= "
+				GROUP BY i.customer_email, bulan_filter
+			) AS summary
+			LEFT JOIN (
+				SELECT email, MIN(name) AS name
+				FROM customers
+				GROUP BY email
+			) AS c ON c.email = summary.customer_email
+			ORDER BY c.name, summary.bulan_filter
+		";
+
+		$stmt = $mysqli->prepare($query);
+		if (!$stmt) {
+			throw new Exception('Query error: ' . $mysqli->error);
+		}
+
+		if (!empty($params)) {
+			$stmt->bind_param($types, ...$params);
+		}
+
+		$stmt->execute();
+		$results = $stmt->get_result();
+
+		if ($results->num_rows > 0) {
+			echo '<table class="table table-striped table-hover table-bordered" id="data-table" cellspacing="0"><thead>
+					<tr>
+						<th>Customer</th>
+						<th>Bulan</th>
+						<th>Total Invoice</th>
+					</tr></thead><tbody>';
+
+			while ($row = $results->fetch_assoc()) {
+				echo '<tr>
+						<td>' . htmlspecialchars($row["name"] ?? '-') . '</td>
+						<td>' . htmlspecialchars($row["bulan_format"] ?? '-') . '</td>
+						<td>Rp ' . number_format($row["total_invoice"], 0, ',', '.') . '</td>
+					  </tr>';
+			}
+			echo '</tbody></table>';
+		} else {
+			echo "<p>Tidak ada data recap untuk filter yang dipilih.</p>";
+		}
+
+		$stmt->close();
+		$mysqli->close();
+	} catch (Exception $e) {
+		error_log('getInvoiceRecap error: ' . $e->getMessage());
+		echo "<p>Terjadi kesalahan saat memuat data recap.</p>";
+	}
 }

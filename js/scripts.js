@@ -318,60 +318,62 @@ $(document).ready(function () {
     $(".calculate-sub", tr).val(subtotal.toFixed(2));
   }
 
-  function calculateTotal() {
-    var grandTotal = 0,
-      disc = 0,
+
+
+function calculateTotal() {
+  var grandTotal = 0,
       c_ship = parseInt($(".calculate.shipping").val()) || 0;
 
-    $("#invoice_table tbody tr").each(function () {
-      var c_sbt = $(".calculate-sub", this).val(),
-        quantity = $('[name="invoice_product_qty[]"]', this).val(),
-        price = $('[name="invoice_product_price[]"]', this).val() || 0,
-        subtotal = parseInt(quantity) * parseFloat(price);
+  $("#invoice_table tbody tr").each(function () {
+    var quantity = parseFloat($('[name="invoice_product_qty[]"]', this).val()) || 0;
+    var price = parseFloat($('[name="invoice_product_price[]"]', this).val()) || 0;
+    var subtotal = quantity * price;
 
-      grandTotal += parseFloat(c_sbt);
-      disc += subtotal - parseFloat(c_sbt);
-    });
+    // Update nilai subtotal ke inputan Sub Total
+    $(".calculate-sub", this).val(subtotal.toFixed(2));
 
-    // VAT, DISCOUNT, SHIPPING, TOTAL, SUBTOTAL:
-    var subT = parseFloat(grandTotal),
-      finalTotal = parseFloat(grandTotal + c_ship),
-      vat = parseInt($(".invoice-vat").attr("data-vat-rate"));
+    grandTotal += subtotal;
+  });
 
-    $(".invoice-sub-total").text(subT.toFixed(2));
-    $("#invoice_subtotal").val(subT.toFixed(2));
-    $(".invoice-discount").text(disc.toFixed(2));
-    $("#invoice_discount").val(disc.toFixed(2));
+  var subT = parseFloat(grandTotal),
+      finalTotal = subT + c_ship,
+      vat = parseInt($(".invoice-vat").attr("data-vat-rate")) || 0;
 
-    if ($(".invoice-vat").attr("data-enable-vat") === "1") {
-      if ($(".invoice-vat").attr("data-vat-method") === "1") {
-        $(".invoice-vat").text(((vat / 100) * finalTotal).toFixed(2));
-        $("#invoice_vat").val(((vat / 100) * finalTotal).toFixed(2));
-        $(".invoice-total").text(finalTotal.toFixed(2));
-        $("#invoice_total").val(finalTotal.toFixed(2));
-      } else {
-        $(".invoice-vat").text(((vat / 100) * finalTotal).toFixed(2));
-        $("#invoice_vat").val(((vat / 100) * finalTotal).toFixed(2));
-        $(".invoice-total").text(
-          (finalTotal + (vat / 100) * finalTotal).toFixed(2)
-        );
-        $("#invoice_total").val(
-          (finalTotal + (vat / 100) * finalTotal).toFixed(2)
-        );
-      }
+  $(".invoice-sub-total").text(subT.toFixed(2));
+  $("#invoice_subtotal").val(subT.toFixed(2));
+
+  $(".invoice-discount").text("0.00");
+  $("#invoice_discount").val("0.00");
+
+  if ($(".invoice-vat").attr("data-enable-vat") === "1") {
+    var vatAmount = (vat / 100) * finalTotal;
+
+    if ($(".invoice-vat").attr("data-vat-method") === "1") {
+      $(".invoice-vat").text(vatAmount.toFixed(2));
+      $("#invoice_vat").val(vatAmount.toFixed(2));
+      $(".invoice-total").text(finalTotal.toFixed(2));
+      $("#invoice_total").val(finalTotal.toFixed(2));
     } else {
-      $(".invoice-total").text(finalTotal.toFixed(2));
-      $("#invoice_total").val(finalTotal.toFixed(2));
+      $(".invoice-vat").text(vatAmount.toFixed(2));
+      $("#invoice_vat").val(vatAmount.toFixed(2));
+      $(".invoice-total").text((finalTotal + vatAmount).toFixed(2));
+      $("#invoice_total").val((finalTotal + vatAmount).toFixed(2));
     }
-
-    // remove vat
-    if ($("input.remove_vat").is(":checked")) {
-      $(".invoice-vat").text("0.00");
-      $("#invoice_vat").val("0.00");
-      $(".invoice-total").text(finalTotal.toFixed(2));
-      $("#invoice_total").val(finalTotal.toFixed(2));
-    }
+  } else {
+    $(".invoice-total").text(finalTotal.toFixed(2));
+    $("#invoice_total").val(finalTotal.toFixed(2));
   }
+
+  if ($("input.remove_vat").is(":checked")) {
+    $(".invoice-vat").text("0.00");
+    $("#invoice_vat").val("0.00");
+    $(".invoice-total").text(finalTotal.toFixed(2));
+    $("#invoice_total").val(finalTotal.toFixed(2));
+  }
+}
+
+
+
 
   function actionAddUser() {
     var errorCounter = validateForm();
